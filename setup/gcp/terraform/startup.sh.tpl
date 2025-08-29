@@ -355,13 +355,21 @@ EOF
 # === Run demo apps ===
 INSTALL_DIR="/home/$USER/labs/dtx_ai_sec_workshop_lab/setup/scripts/tools"
 
-for script in install-finbot-ctf-demo.sh install-openai-cs-agents-demo.sh; do
+# Ensure uv is on PATH for this session
+export PATH="/home/dtx/.local/bin:$PATH"
+
+for script in install-finbot-ctf-demo.sh install-openai-cs-agents-demo.sh install-ai-red-teaming-playground-labs.sh; do
+  # Only source .bashrc if it exists
+  [ -f "$HOME/.bashrc" ] && source "$HOME/.bashrc"
+
   if [ -f "$INSTALL_DIR/$script" ]; then
     echo "🚀 Running $script"
     chmod +x "$INSTALL_DIR/$script"
-    sudo -u "$USER" bash "$INSTALL_DIR/$script" || true
+    # Preserve PATH for the child process (sudo can drop env vars)
+    sudo --preserve-env=PATH -u "$USER" bash "$INSTALL_DIR/$script" || true
   fi
 done
+
 
 
 # === Install Metasploit ===

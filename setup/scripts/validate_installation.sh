@@ -125,6 +125,18 @@ else
   log "❌ DTX vuln lab directory not found"
 fi
 
+# === AI Red Teaming Playground Labs ===
+if cd "$HOME/labs/webapps/AI-Red-Teaming-Playground-Labs" 2>/dev/null; then
+  log "🚀 Starting AI Red Teaming Playground Labs..."
+  log "$(./start.sh 2>&1)" || true
+  sleep 5
+  check_url "Playground Home (localhost)" "http://localhost:15000" || true
+  log "🛑 Stopping Playground..."
+  log "$(docker compose -f docker-compose-openai.yaml down 2>&1)" || true
+else
+  log "ℹ️ Playground not installed; skipping."
+fi
+
 # === Start Promptfoo and Autogen Studio ===
 log ""
 log "🚀 Starting Promptfoo and Autogen Studio (no tmux)..."

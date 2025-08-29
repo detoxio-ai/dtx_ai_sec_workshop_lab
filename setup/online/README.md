@@ -6,7 +6,7 @@ This environment has been set up for a **hands-on, high-level workshop**, giving
 Think of it as your own **sandbox** — you’ll be able to log in, explore, and interact with different demo applications and security tools. All you need is the **server address** (`IP_ADDRESS`) and the **private key** provided to you (either a `.ppk` file for Windows or an `id_ed25519` key for Linux/macOS/WSL).
 
 The lab exposes several example services on the following ports:
-**8443, 17860–17863, 8080, 18081, 18000**
+**8443, 17860–17863, 8080, 18081, 18000, 15000, 4001-4012**
 
 Depending on your setup:
 
@@ -64,6 +64,8 @@ http://IP_ADDRESS:17863
 http://IP_ADDRESS:8080
 http://IP_ADDRESS:18081
 http://IP_ADDRESS:18000
+http://IP_ADDRESS:15000          (Playground Home UI)
+http://IP_ADDRESS:4001..4012     (Playground Labs — one port per lab)
 ```
 
 CLI spot-checks from your laptop:
@@ -95,6 +97,9 @@ ssh -i id_ed25519 -o IdentitiesOnly=yes -N \
 -L 8080:localhost:8080 \
 -L 18081:localhost:18081 \
 -L 18000:localhost:18000 \
+-L 15000:localhost:15000 \
+# Labs (choose any between 4001–4012, one -L per port you plan to use)
+# -L 4001:localhost:4001 -L 4002:localhost:4002 ... -L 4012:localhost:4012 \
 dtx@IP_ADDRESS
 ```
 
@@ -109,6 +114,7 @@ http://localhost:17863
 http://localhost:8080
 http://localhost:18081
 http://localhost:18000
+http://localhost:15000
 ```
 
 ### B) PuTTY tunnels (Windows)
@@ -124,6 +130,8 @@ http://localhost:18000
    * `8080`  → `127.0.0.1:8080`  → **Add**
    * `18081` → `127.0.0.1:18081` → **Add**
    * `18000` → `127.0.0.1:18000` → **Add**
+   * `15000` → `127.0.0.1:15000` → **Add**
+   * (Labs) Add any of 4001–4012 → 127.0.0.1:<same port>
 3. Back to **Session** → **Open**
 4. Browse to the **localhost** URLs shown above.
 

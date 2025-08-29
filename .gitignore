@@ -1,4 +1,3 @@
-➜  cat .gitignore 
 **id_ed25519*
 .terraform*
 
@@ -32,13 +31,34 @@ bootstrap.sh
 generate_ssh_key_and_update_tfvars.sh
 startup.sh.tpl.*
 
-# VS Code / JetBrains
+# Editors / IDEs
 .vscode/
 .idea/
 
 # OS junk
 .DS_Store
 Thumbs.db
+
+# ---------- Runtime & app clones (do NOT commit) ----------
+# Third-party labs/apps cloned by installers
+labs/
+
+# Python
+**/.venv/
+venv/
+**/__pycache__/
+*.py[cod]
+
+# Node / builds
+node_modules/
+dist/
+build/
+
+# Env files & secrets
 .env
+.env.*
+!.env.example
 
-
+# SQLite / local DBs
+*.sqlite
+*.sqlite3
