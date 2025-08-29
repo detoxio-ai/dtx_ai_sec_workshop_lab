@@ -26,14 +26,68 @@ else
   echo "✅ Repository already exists."
 fi
 
-
 # Build Docker image
 cd "$BASE_DIR/damn-vulnerable-MCP-server"
 echo "🐳 Building Docker image: $IMAGE_NAME"
 docker build -t "$IMAGE_NAME" .
 
-echo "✅ Installation complete!"
+# Create start_service.sh
+START_SCRIPT="$BASE_DIR/start_service.sh"
+echo "⚙️ Creating start_service.sh"
+cat > "$START_SCRIPT" <<'EOL'
+#!/bin/bash
+set -e
+BASE_DIR="/home/dtx/labs/webapps/mcp/damn"
 
+CONTAINER_NAME="dvmcp"
+IMAGE_NAME="dvmcp"
+
+echo "🚀 Starting container: $CONTAINER_NAME on ports 18567:18576"
+
+# Remove old container if exists
+if docker ps -a --format '{{.Names}}' | grep -Eq "^${CONTAINER_NAME}\$"; then
+  echo "⚠️ Container $CONTAINER_NAME already exists. Restarting..."
+  docker start "$CONTAINER_NAME" || true
+else
+  echo "Container $CONTAINER_NAME is Powering Up..."
+  docker run -d \
+    --name "$CONTAINER_NAME" \
+    -p 18567-18576:9001-9010 \
+    "$IMAGE_NAME"
+fi
+EOL
+chmod +x "$START_SCRIPT"
+
+# Create fresh_start.sh
+FRESH_START_SCRIPT="$BASE_DIR/fresh_start.sh"
+echo "⚙️ Creating fresh_start.sh"
+cat > "$FRESH_START_SCRIPT" <<'EOL'
+#!/bin/bash
+set -e
+BASE_DIR="/home/dtx/labs/webapps/mcp/damn"
+
+CONTAINER_NAME="dvmcp"
+IMAGE_NAME="dvmcp"
+
+echo "🚀 Starting container: $CONTAINER_NAME on ports 18567:18576"
+
+# Remove old container if exists
+if docker ps -a --format '{{.Names}}' | grep -Eq "^${CONTAINER_NAME}\$"; then
+  echo "🐳 Building Docker image: $IMAGE_NAME (no cache)"
+  docker build --no-cache -t "$IMAGE_NAME" ./damn-vulnerable-MCP-server/.
+  docker stop "$CONTAINER_NAME" || true
+  docker rm "$CONTAINER_NAME" || true
+fi
+
+echo "Container $CONTAINER_NAME is Powering Up..."
+docker run -d \
+  --name "$CONTAINER_NAME" \
+  -p 18567-18576:9001-9010 \
+  "$IMAGE_NAME"
+EOL
+chmod +x "$FRESH_START_SCRIPT"
+
+echo "✅ Installation complete!"
 
 echo "🚀 Starting container: $CONTAINER_NAME on ports 18567:18576"
 
@@ -46,7 +100,7 @@ fi
 
 docker run -d \
   --name "$CONTAINER_NAME" \
-  -p 18567-18576:9001-9010\
+  -p 18567-18576:9001-9010 \
   "$IMAGE_NAME"
 
 # Verify container is running
