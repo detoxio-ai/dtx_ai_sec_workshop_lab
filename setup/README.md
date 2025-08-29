@@ -404,7 +404,7 @@ To start the server
 
 ```bash
 cd labs/webapps/mcp/damn
-docker run -d -restart unless-stopped --name dvmcp -p 18567-18576:9001-9010 dvmcp
+./start_service.sh
 ```
 
 To stop the server 
@@ -422,8 +422,7 @@ docker logs -f dvmcp
 To run the server with clearing data
 
 ```bash
-docker stop dvmcp
-docker rm dvmcp
+./fresh_start.sh
 ```
 
 ---
@@ -462,6 +461,6 @@ Optional: logs to file and stdout
 | llm                | `llm "your prompt"`             | Terminal response / chat mode |
 | **Autogen Studio** | `autogenstudio ui --port 18081` | `http://IP_ADDRESS:18081`      |
 | Reaper             | `docker compose up -d`          | `http://IP_ADDRESS:18000`       |
-| Reaper             | `docker run -d -restart unless-stopped --name dvmcp -p 18567-18576:9001-9010 dvmcp `          | `http://IP_ADDRESS:18000`       |
+| Reaper             | `./start_service.sh`            | `http://IP_ADDRESS:18000`       |
 
 
