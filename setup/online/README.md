@@ -50,6 +50,26 @@ ssh -i id_ed25519 -o IdentitiesOnly=yes dtx@IP_ADDRESS
 4. **Open**
 
 ---
+## 🖥️ Connect via RDP
+
+If you prefer a full **desktop environment** for the workshop:
+
+```bash
+export DTX_PASSWORD=<passwd>
+./labs/dtx_ai_sec_workshop_lab/setup/scripts/tools/setup-xrdp.sh
+```
+
+Once the setup finishes, use any RDP client to connect to the server:
+
+* **Linux/macOS**: `rdesktop`, `Remmina`, or another RDP client
+* **Windows**: Use the built-in **Remote Desktop Connection**
+
+👉 Connect to the server using the same `IP_ADDRESS` and the password you exported in the `DTX_PASSWORD` variable.
+
+After logging in, you’ll have access to the same lab tools and services as in the SSH setup — now through a graphical desktop session.
+
+---
+
 
 ## 🔎 Verify access (direct, no tunnel)
 
