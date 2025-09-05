@@ -30,10 +30,10 @@ A hands-on sandbox for **AI security**—practice adversarial testing of LLMs, h
 ---
 
 ## 🚀 Setup (pick one)
-* **Hosted / Online Access (provided by Trainer)** → [`setup/online/README.md`](setup/online/README.md)
-* **Local VM (Ubuntu, single machine)** → [`setup/local/README.md`](setup/local/README.md)
-* **Google Cloud (Terraform + Make)** → [`setup/gcp/README.md`](setup/gcp/README.md)
-
+* **Kalki VM** → [`setup/vm/README.md`](setup/vm/README.md)
+* **Setup yourself** → [`setup/local/README.md`](setup/local/README.md)
+* **Google Cloud Platform (Terraform + Make)** → [`setup/gcp/README.md`](setup/gcp/README.md)
+* **Hosted / Online Instance (provided by Trainer)** → [`setup/online/README.md`](setup/online/README.md)
 
 **Additional Setup (Recommended): GPUs & Online Models (Groq, OpenAI, Detoxio Gateway)** → [`setup/optionals/README.md`](setup/optionals/README.md)
 
