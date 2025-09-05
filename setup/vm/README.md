@@ -37,7 +37,7 @@ This guide sets up the **DTX demo lab** using a **Simple Plug and Play VM** (no 
 - Once Import is done, Set the configuration by press the setting
 - - **RAM:** 16GB RAM ( Min 8GB of RAM recommended ) 
 - - **HDD:** 250GB HDD ( Min 50GB of HDD recommended )
-- - **CPU :** 4 Core 
+- - **CPU :** 8 Core 
 - Then Start the machine 
 - Enter the Username & Password: ``` dtx : dtx ```
 - Paste API keys in .secret Directory
