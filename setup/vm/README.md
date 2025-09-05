@@ -28,6 +28,14 @@ This guide sets up the **DTX demo lab** using a **Simple Plug and Play VM** (no 
 
 
 # Steps to Setup Labs:
+
+<iframe width="560" height="315" 
+src="https://www.youtube.com/embed/rKCMBK2kqGM?si=p4w4LEe7x_3RgXaS"
+title="YouTube video player" 
+frameborder="0" 
+allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+allowfullscreen></iframe>
+
 - Install Oracle Virtualbox
 - Download the [Kalki.ova](https://huggingface.co/datasets/detoxioai/dtx-ai-sec-lab/blob/main/kalki.ova)
 - Open the ```Kalki.ova``` with Oracle VirtualBox ( It will started to import the labs )
@@ -41,7 +49,6 @@ This guide sets up the **DTX demo lab** using a **Simple Plug and Play VM** (no 
 ``` bash
  echo '< OPENAI_API_KEY >' > ~/.secrets/OPENAI_API_KEY.txt
  echo '< GROQ_API_KEY >' > ~/.secrets/GROQ_API_KEY.txt
- echo '< ANTHROPIC_API_KEY >' > ~/.secrets/ANTHROPIC_API_KEY.txt
 ```
 - Run the Tool_setup.sh file 
 ``` bash
