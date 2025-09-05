@@ -29,12 +29,7 @@ This guide sets up the **DTX demo lab** using a **Simple Plug and Play VM** (no 
 
 # Steps to Setup Labs:
 
-<iframe width="560" height="315" 
-src="https://www.youtube.com/embed/rKCMBK2kqGM?si=p4w4LEe7x_3RgXaS"
-title="YouTube video player" 
-frameborder="0" 
-allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-allowfullscreen></iframe>
+[![Setup Tutorial](./thumbnail.png)](https://www.youtube.com/watch?v=rKCMBK2kqGM)
 
 - Install Oracle Virtualbox
 - Download the [Kalki.ova](https://huggingface.co/datasets/detoxioai/dtx-ai-sec-lab/blob/main/kalki.ova)
