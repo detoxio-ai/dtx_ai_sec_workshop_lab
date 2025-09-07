@@ -60,3 +60,73 @@ ssh-keygen -t ed25519 -C "your_email@example.com"
 ``` bash
 ssh dtx@< machine ip >
 ```
+
+# **Frequently Asked Questions (FAQ) for VirtualBox Errors**
+
+This guide provides solutions to common errors encountered when setting up virtual machines in Oracle VirtualBox, particularly on a Linux host system.
+
+#### **1. Network Adapter Not Found Error**
+
+**Q: Why does VirtualBox show the error "Could not start the machine... because the following physical network interfaces were not found"?**
+
+  * **Symptom:** You try to start your VM and receive an error message listing a specific network card that was not found, such as "MediaTek Wi-Fi 6 MT7921 Wireless LAN Card".
+
+  * **Cause:** This happens because your VM's network settings are configured in **"Bridged Adapter"** mode and are tied to a *specific* physical network card on your computer. VirtualBox cannot start the VM because it can't find or access that exact card. This could be because your Wi-Fi is off, you've moved the VM to a new computer, or the card's name has changed.
+
+  * **Solution (Recommended): Switch to NAT**
+    This is the easiest fix and works for most use cases, allowing your VM to access the internet.
+
+    1.  Select your VM in the VirtualBox main window and click **Settings**.
+    2.  Go to the **Network** tab.
+    3.  In the **"Adapter 1"** tab, find the **"Attached to:"** dropdown menu.
+    4.  Change the selection from "Bridged Adapter" to **"NAT"**.
+    5.  Click **OK** and start your VM.
+
+  * **Solution (Alternative): Re-select the Bridged Adapter**
+    Use this option only if you specifically need your VM to appear as a separate device on your local network.
+
+    1.  Go to **Settings \> Network \> Adapter 1**.
+    2.  Ensure **"Attached to:"** is set to "Bridged Adapter".
+    3.  In the **"Name:"** dropdown menu below it, select a **currently active** network connection from the list (e.g., your Ethernet port or a different Wi-Fi adapter).
+    4.  Click **OK** and start your VM.
+
+-----
+
+#### **2. KVM / AMD-V Virtualization Conflict**
+
+**Q: How do I fix the error "VirtualBox can't enable the AMD-V extension. Please disable the KVM kernel extension... (VERR\_SVM\_IN\_USE)"?**
+
+  * **Symptom:** Your VM fails to start, and the error message mentions `AMD-V` (for AMD CPUs) or `VT-x` (for Intel CPUs) and complains that it is already in use (`VERR_SVM_IN_USE`). It specifically mentions disabling **KVM**.
+
+  * **Cause:** Your computer's CPU has hardware virtualization features that allow VMs to run efficiently. However, only **one program** (a hypervisor) can use these features at a time. On Linux, the built-in hypervisor is called **KVM** (Kernel-based Virtual Machine). This error means KVM is currently active, preventing VirtualBox from accessing the CPU's virtualization features.
+
+  * **Solution (Temporary Fix): Unload the KVM Module**
+    This is the best option if you switch between VirtualBox and other virtualization tools (like QEMU/GNOME Boxes). This command is temporary and will reset upon reboot.
+
+    1.  Open a Terminal on your host Linux machine.
+    2.  Run the following commands to unload the KVM modules:
+        ```bash
+        # For AMD Processors (like yours)
+        sudo modprobe -r kvm_amd
+        sudo modprobe -r kvm
+
+        # For Intel Processors (for future reference)
+        # sudo modprobe -r kvm_intel
+        # sudo modprobe -r kvm
+        ```
+    3.  Try starting your VirtualBox VM again. It should now work.
+
+  * **Solution (Permanent Fix): Blacklist the KVM Module**
+    Use this option only if you plan to use VirtualBox exclusively for virtualization.
+
+    1.  Open a Terminal and create a new configuration file with a text editor:
+        ```bash
+        sudo nano /etc/modprobe.d/blacklist-kvm.conf
+        ```
+    2.  Add the following lines to the file (use `kvm_amd` for your AMD system):
+        ```
+        blacklist kvm_amd
+        blacklist kvm
+        ```
+    3.  Save the file and exit (`Ctrl+X`, then `Y`, then `Enter`).
+    4.  Reboot your computer. KVM will no longer load on startup, freeing up the hardware for VirtualBox to use.
