@@ -21,12 +21,6 @@ export PATH="$GOBIN:$PATH"
 export PATH="$PATH:/usr/local/go/bin"
 BRC
 
-# NVM Installation
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-nvm --version
-
-
 # ---- Python tools ----
 source $HOME/.local/bin/env
 uv tool install "dtx[torch]>=0.26.0"
@@ -107,6 +101,10 @@ playwright install chrome || true
 ollama pull smollm2 || true
 ollama pull qwen3:0.6b || true
 ollama pull llama-guard3:1b-q3_K_S || true
+
+# ------- UI Install -------
+sudo apt update -y 
+sudo apt install -y ubuntu-desktop-minimal
 
 echo "👉 If you have API keys (OpenAI, Anthropic, Groq), save them in ~/.secrets/"
 echo "   Example: echo 'sk-xxxxx' > ~/.secrets/OPENAI_API_KEY.txt"
