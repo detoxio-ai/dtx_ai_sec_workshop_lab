@@ -64,7 +64,7 @@ sudo -u $USER bash -c 'bash -lc "source \$HOME/.local/bin/env && uv python insta
 # === Python Tools via uv ===
 sudo -u $USER bash -c 'bash -lc "
   source \$HOME/.local/bin/env
-  uv tool install \"dtx[torch]>=0.26.0\"
+  uv tool install \"dtx[torch]>=0.26.0\" --with protobuf
   uv tool install \"garak\"
   uv tool install \"textattack[tensorflow]\"
   uv tool install \"huggingface_hub[cli,torch]\"
