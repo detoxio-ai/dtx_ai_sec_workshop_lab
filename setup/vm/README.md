@@ -42,6 +42,7 @@ This guide sets up the **DTX demo lab** using a **Simple Plug and Play VM** (no 
 - Enter the Username & Password: ``` dtx : dtx ```
 - Paste API keys in .secret Directory
 ``` bash
+ mkdir -p ~/.secrets/
  echo '< OPENAI_API_KEY >' > ~/.secrets/OPENAI_API_KEY.txt
  echo '< GROQ_API_KEY >' > ~/.secrets/GROQ_API_KEY.txt
 ```
