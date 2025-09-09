@@ -1,112 +1,210 @@
 #!/usr/bin/env bash
-set -euxo pipefail
+set -euo pipefail
 
-echo "🚀 Installing full lab extras (this may take a while)..."
+# ============================================================
+# DTX Lab — Post setup (user tools, repos, models, keys)
+# Run with: sudo ./post.sh
+# ============================================================
 
-TARGET_USER="dtx"
-HOME="/home/$TARGET_USER"
-cd $HOME
-
-# ---- Shell PATHs ----
-cat >> /home/$TARGET_USER/.bashrc <<'BRC'
-export PATH="$HOME/.asdf/bin:$HOME/.asdf/shims:$PATH"
-. "$HOME/.asdf/asdf.sh"
-. "$HOME/.asdf/completions/asdf.bash"
-export PATH="$HOME/.local/bin:$PATH"
-source "$HOME/.local/bin/env" 2>/dev/null || true
-export PATH="$HOME/.npm-global/bin:$PATH"
-export PATH="$HOME/.ollama/bin:$PATH"
-export GOBIN="$HOME/.local/bin"
-export PATH="$GOBIN:$PATH"
-export PATH="$PATH:/usr/local/go/bin"
-BRC
-
-# ---- Python tools ----
-source $HOME/.local/bin/env
-uv tool install "dtx[torch]>=0.26.0"
-uv tool install "garak"
-uv tool install "textattack[tensorflow]"
-uv tool install "huggingface_hub[cli,torch]"
-uv tool install "llm"
-uv tool install "cai-framework"
-
-# ---- Secrets -> files + export on login ----
-SECRETS_DIR="/home/$TARGET_USER/.secrets"
-mkdir -p "$SECRETS_DIR"
-echo "" > "$SECRETS_DIR/OPENAI_API_KEY.txt"
-echo "" > "$SECRETS_DIR/GROQ_API_KEY.txt"
-chown -R $TARGET_USER:$TARGET_USER "/home/$TARGET_USER/"
-chmod 700 "$SECRETS_DIR" || true
-
-cat >> /home/$TARGET_USER/.bashrc <<'BRC'
-[ -f "$HOME/.secrets/OPENAI_API_KEY.txt" ] && export OPENAI_API_KEY=$(cat "$HOME/.secrets/OPENAI_API_KEY.txt")
-[ -f "$HOME/.secrets/GROQ_API_KEY.txt" ]   && export GROQ_API_KEY=$(cat "$HOME/.secrets/GROQ_API_KEY.txt")
-BRC
-
-# ---- Labs repos ----
-LABS_DIR="/home/$TARGET_USER/labs"
-sudo -u "$TARGET_USER" bash -lc "mkdir -p '$LABS_DIR' && cd '$LABS_DIR' && \
-  git clone https://github.com/detoxio-ai/ai-red-teaming-training.git || true && \
-  git clone https://github.com/detoxio-ai/dtx_ai_sec_workshop_lab.git || true"
-
-# ---- Run lab install scripts if present ----
-INSTALL_DIR="/home/$TARGET_USER/labs/dtx_ai_sec_workshop_lab/setup/scripts/tools"
-for script in install-dtx-demo-lab.sh install-pentagi.sh install-vulnhub-lab.sh; do
-  if [ -f "$INSTALL_DIR/$script" ]; then
-    echo "🚀 Running $script"
-    chmod +x "$INSTALL_DIR/$script"
-    sudo -u "$TARGET_USER" bash "$INSTALL_DIR/$script" || true
-  fi
-done
-
-# ---- Copy validator if present ----
-VALIDATE_SCRIPT="$INSTALL_DIR/../validate_installation.sh"
-if [ -f "$VALIDATE_SCRIPT" ]; then
-  cp "$VALIDATE_SCRIPT" "/home/$TARGET_USER/validate_installation.sh"
-  chown "$TARGET_USER:$TARGET_USER" "/home/$TARGET_USER/validate_installation.sh"
+# --- Resolve target user/home (prefer sudo caller), fallback 'dtx' ---
+TARGET_USER="${SUDO_USER:-dtx}"
+if ! id "$TARGET_USER" &>/dev/null; then
+  echo "❌ Target user '$TARGET_USER' does not exist."; exit 1
+fi
+TARGET_HOME="$(getent passwd "$TARGET_USER" | cut -d: -f6)"
+if [[ -z "${TARGET_HOME}" || ! -d "${TARGET_HOME}" ]]; then
+  echo "❌ Could not resolve home for '$TARGET_USER'."; exit 1
 fi
 
+echo "➡️  Using TARGET_USER=$TARGET_USER  TARGET_HOME=$TARGET_HOME"
 
-# ---- ProjectDiscovery Tools ----
-. $HOME/.asdf/asdf.sh
-export GOBIN=$HOME/.local/bin
-mkdir -p $GOBIN
-go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest
-go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
-go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
-CGO_ENABLED=0 go install -v github.com/owasp-amass/amass/v5/cmd/amass@main
+# --- Ensure we're root for system actions
+if [[ $EUID -ne 0 ]]; then
+  echo "❌ Please run with sudo/root."; exit 1
+fi
 
-# ---- PentestGPT ----
-TMP_DIR="$(mktemp -d)"
-git clone --depth=1 https://github.com/GreyDGL/PentestGPT "$TMP_DIR/PentestGPT"
-rm -rf "$TMP_DIR/PentestGPT/benchmark"
-uv tool install "$TMP_DIR/PentestGPT"
-rm -rf "$TMP_DIR"
+# --- Helper: append to user's .bashrc only once
+append_once_bashrc () {
+  local marker="$1"
+  local block="$2"
+  local bashrc="$TARGET_HOME/.bashrc"
+  grep -qF "$marker" "$bashrc" 2>/dev/null || {
+    printf "%s\n" "$block" >> "$bashrc"
+    chown "$TARGET_USER:$TARGET_USER" "$bashrc"
+  }
+}
 
-# ---- Metasploit + searchsploit ----
-sudo apt-get install -y nmap
-curl -sSL https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb > msfinstall
+# ============================================================
+# 1) Ensure uv user environment exists (installed in pre script)
+# ============================================================
+sudo -u "$TARGET_USER" bash -lc '
+  if [ ! -f "$HOME/.local/bin/env" ]; then
+    echo "❌ uv environment not found at $HOME/.local/bin/env"; exit 1
+  fi
+'
+
+# ============================================================
+# 2) Python tools via uv (user-scope)
+# ============================================================
+sudo -u "$TARGET_USER" bash -lc '
+  set -e
+  source "$HOME/.local/bin/env"
+  uv tool install "dtx[torch]>=0.26.0"
+  uv tool install "garak"
+  uv tool install "textattack[tensorflow]"
+  uv tool install "huggingface_hub[cli,torch]"
+'
+
+# ============================================================
+# 3) Ollama models (system-level, tolerate absence)
+# ============================================================
+# Start/enable service if present (don’t fail hard on minimal envs)
+systemctl enable ollama >/dev/null 2>&1 || true
+systemctl start  ollama >/dev/null 2>&1 || true
+
+# Pull models (ignore failures if ollama/daemon not present yet)
+ollama pull smollm2                 || true
+ollama pull qwen3:0.6b              || true
+ollama pull llama-guard3:1b-q3_K_S  || true
+
+# ============================================================
+# 4) Export API keys from secrets via user's .bashrc
+# ============================================================
+API_MARKER="# === Export API keys from secrets directory ==="
+API_BLOCK=$(cat <<'EOF'
+# === Export API keys from secrets directory ===
+if [ -f "$HOME/.secrets/OPENAI_API_KEY.txt" ]; then
+  export OPENAI_API_KEY="$(cat "$HOME/.secrets/OPENAI_API_KEY.txt")"
+fi
+if [ -f "$HOME/.secrets/GROQ_API_KEY.txt" ]; then
+  export GROQ_API_KEY="$(cat "$HOME/.secrets/GROQ_API_KEY.txt")"
+fi
+if [ -f "$HOME/.secrets/HF_TOKEN.txt" ]; then
+  export HF_TOKEN="$(cat "$HOME/.secrets/HF_TOKEN.txt")"
+fi
+EOF
+)
+append_once_bashrc "$API_MARKER" "$API_BLOCK"
+
+# ============================================================
+# 5) Clone labs repos (user-scope)
+# ============================================================
+LABS_DIR="$TARGET_HOME/labs"
+sudo -u "$TARGET_USER" bash -lc "
+  set -e
+  mkdir -p '$LABS_DIR'
+  cd '$LABS_DIR'
+  [ -d ai-red-teaming-training ] || git clone https://github.com/detoxio-ai/ai-red-teaming-training.git
+  [ -d dtx_ai_sec_workshop_lab ] || git clone https://github.com/detoxio-ai/dtx_ai_sec_workshop_lab.git
+"
+
+# ============================================================
+# 6) Copy validate_installation.sh if present
+# ============================================================
+INSTALL_DIR="$TARGET_HOME/labs/dtx_ai_sec_workshop_lab/setup/scripts/tools"
+VALIDATE_SCRIPT="$INSTALL_DIR/../validate_installation.sh"
+if [ -f "$VALIDATE_SCRIPT" ]; then
+  cp "$VALIDATE_SCRIPT" "$TARGET_HOME/validate_installation.sh"
+  chown "$TARGET_USER:$TARGET_USER" "$TARGET_HOME/validate_installation.sh"
+  echo "✅ Copied validate_installation.sh to $TARGET_HOME/"
+fi
+
+# ============================================================
+# 7) Install LLM CLI and set OpenAI key (user-scope)
+# ============================================================
+sudo -u "$TARGET_USER" bash -lc '
+  set -e
+  source "$HOME/.local/bin/env"
+  uv tool install "llm"
+  if [ -f "$HOME/.secrets/OPENAI_API_KEY.txt" ]; then
+    OPENAI_KEY="$(cat "$HOME/.secrets/OPENAI_API_KEY.txt")"
+    if [ -n "$OPENAI_KEY" ]; then
+      llm keys set openai --value "$OPENAI_KEY"
+    else
+      echo "⚠️  OPENAI_API_KEY.txt is empty; skipping llm key set."
+    fi
+  else
+    echo "ℹ️  No $HOME/.secrets/OPENAI_API_KEY.txt; skipping llm key set."
+  fi
+'
+
+# ============================================================
+# 8) Create ~/.aisecurity venv + core ML pkgs (user-scope)
+# ============================================================
+sudo -u "$TARGET_USER" bash -lc '
+  set -e
+  source "$HOME/.local/bin/env" 2>/dev/null || true
+
+  PY_BIN="$( (uv python find 3.12 2>/dev/null) || command -v python3.12 || command -v python3 || echo python )"
+  "$PY_BIN" -m venv "$HOME/.aisecurity"
+
+  source "$HOME/.aisecurity/bin/activate"
+  python -m pip install --upgrade pip
+  pip install --upgrade torch nltk transformers datasets
+  deactivate
+'
+
+# ============================================================
+# 9) Run NLTK downloader script if present (user-scope)
+# ============================================================
+sudo -u "$TARGET_USER" bash -lc '
+  set -e
+  DL_SCRIPT="$HOME/labs/dtx_ai_sec_workshop_lab/setup/scripts/tools/download_nltk.sh"
+  if [ -x "$DL_SCRIPT" ]; then
+    source "$HOME/.aisecurity/bin/activate"
+    "$DL_SCRIPT" || true
+    deactivate || true
+    touch "$HOME/.aisecurity/.nltk_downloaded" || true
+  else
+    echo "ℹ️  NLTK download script not found at $DL_SCRIPT"
+  fi
+'
+
+# ============================================================
+# 10) Add aliases + one-time NLTK bootstrap to user's .bashrc
+# ============================================================
+ALIAS_MARKER="# === ai-security helpers ==="
+ALIAS_BLOCK=$(cat <<'EOF'
+# === ai-security helpers ===
+alias activate_aisec="source $HOME/.aisecurity/bin/activate"
+alias source_aisec="source $HOME/.aisecurity/bin/activate"
+alias source_aisecurity="source $HOME/.aisecurity/bin/activate"
+EOF
+)
+append_once_bashrc "$ALIAS_MARKER" "$ALIAS_BLOCK"
+
+BOOTSTRAP_MARKER="# === ai-security NLTK bootstrap ==="
+BOOTSTRAP_BLOCK=$(cat <<'EOF'
+
+# === ai-security NLTK bootstrap ===
+if [ -d "$HOME/.aisecurity" ] && [ ! -f "$HOME/.aisecurity/.nltk_downloaded" ]; then
+  if [ -x "$HOME/labs/dtx_ai_sec_workshop_lab/setup/scripts/tools/download_nltk.sh" ]; then
+    source "$HOME/.aisecurity/bin/activate"
+    "$HOME/labs/dtx_ai_sec_workshop_lab/setup/scripts/tools/download_nltk.sh" || true
+    deactivate || true
+    touch "$HOME/.aisecurity/.nltk_downloaded" || true
+  fi
+fi
+EOF
+)
+append_once_bashrc "$BOOTSTRAP_MARKER" "$BOOTSTRAP_BLOCK"
+
+# ============================================================
+# 11) Metasploit — MUST run as root (msfinstall does root ops)
+# ============================================================
+# Use a temp working dir under /tmp, then clean up
+TMPDIR="$(mktemp -d)"
+pushd "$TMPDIR" >/dev/null
+curl -sSL https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb -o msfinstall
 chmod 755 msfinstall
-yes | ./msfinstall || true
-yes | msfdb init || true
-sudo snap install searchsploit || true
+rm -f /usr/share/keyrings/metasploit-framework.gpg || true
+yes | ./msfinstall >/dev/null 2>&1 || true
+yes | msfdb init   >/dev/null 2>&1 || true
+popd >/dev/null
+rm -rf "$TMPDIR"
 
-# ---- promptfoo + Playwright (Chrome only) ----
-. $HOME/.asdf/asdf.sh
-sudo npm install -g promptfoo
-sudo npm install -g playwright
-playwright install chrome || true
-
-# ------- Models Import -------
-ollama pull smollm2 || true
-ollama pull qwen3:0.6b || true
-ollama pull llama-guard3:1b-q3_K_S || true
-
-# ------- UI Install -------
-sudo apt update -y 
-sudo apt install -y ubuntu-desktop-minimal
-
-echo "👉 If you have API keys (OpenAI, Anthropic, Groq), save them in ~/.secrets/"
-echo "   Example: echo 'sk-xxxxx' > ~/.secrets/OPENAI_API_KEY.txt"
-
-echo "✅ Full lab setup complete!"
+# ============================================================
+# Done
+# ============================================================
+chown -R "$TARGET_USER:$TARGET_USER" "$TARGET_HOME/.aisecurity" 2>/dev/null || true
+echo "✅ Post-setup complete for $TARGET_USER"
