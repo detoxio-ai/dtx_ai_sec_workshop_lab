@@ -51,7 +51,6 @@ sudo -u "$TARGET_USER" bash -lc '
   source "$HOME/.local/bin/env"
   uv tool install "dtx[torch]>=0.26.0"
   uv tool install "garak"
-  uv tool install "textattack[tensorflow]"
   uv tool install "huggingface_hub[cli,torch]"
 '
 
@@ -143,51 +142,6 @@ sudo -u "$TARGET_USER" bash -lc '
   pip install --upgrade torch nltk transformers datasets
   deactivate
 '
-
-# ============================================================
-# 9) Run NLTK downloader script if present (user-scope)
-# ============================================================
-sudo -u "$TARGET_USER" bash -lc '
-  set -e
-  DL_SCRIPT="$HOME/labs/dtx_ai_sec_workshop_lab/setup/scripts/tools/download_nltk.sh"
-  if [ -x "$DL_SCRIPT" ]; then
-    source "$HOME/.aisecurity/bin/activate"
-    "$DL_SCRIPT" || true
-    deactivate || true
-    touch "$HOME/.aisecurity/.nltk_downloaded" || true
-  else
-    echo "ℹ️  NLTK download script not found at $DL_SCRIPT"
-  fi
-'
-
-# ============================================================
-# 10) Add aliases + one-time NLTK bootstrap to user's .bashrc
-# ============================================================
-ALIAS_MARKER="# === ai-security helpers ==="
-ALIAS_BLOCK=$(cat <<'EOF'
-# === ai-security helpers ===
-alias activate_aisec="source $HOME/.aisecurity/bin/activate"
-alias source_aisec="source $HOME/.aisecurity/bin/activate"
-alias source_aisecurity="source $HOME/.aisecurity/bin/activate"
-EOF
-)
-append_once_bashrc "$ALIAS_MARKER" "$ALIAS_BLOCK"
-
-BOOTSTRAP_MARKER="# === ai-security NLTK bootstrap ==="
-BOOTSTRAP_BLOCK=$(cat <<'EOF'
-
-# === ai-security NLTK bootstrap ===
-if [ -d "$HOME/.aisecurity" ] && [ ! -f "$HOME/.aisecurity/.nltk_downloaded" ]; then
-  if [ -x "$HOME/labs/dtx_ai_sec_workshop_lab/setup/scripts/tools/download_nltk.sh" ]; then
-    source "$HOME/.aisecurity/bin/activate"
-    "$HOME/labs/dtx_ai_sec_workshop_lab/setup/scripts/tools/download_nltk.sh" || true
-    deactivate || true
-    touch "$HOME/.aisecurity/.nltk_downloaded" || true
-  fi
-fi
-EOF
-)
-append_once_bashrc "$BOOTSTRAP_MARKER" "$BOOTSTRAP_BLOCK"
 
 # ============================================================
 # 11) Metasploit — MUST run as root (msfinstall does root ops)
