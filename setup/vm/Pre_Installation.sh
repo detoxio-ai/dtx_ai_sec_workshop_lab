@@ -52,6 +52,11 @@ apt-get install -y \
   net-tools \
   nmap \
   tmux \
+  python2 \
+  python3.13 \
+  python3.13-dev \
+  python3.13-venv \
+  build-essessntial \
   nginx
 
 # ============================================================
