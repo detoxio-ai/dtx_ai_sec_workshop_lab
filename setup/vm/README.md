@@ -51,6 +51,82 @@ This guide sets up the **DTX demo lab** using a **Simple Plug and Play VM** (no 
 sudo ./Tool_Setup.sh 
 ```
 
+### Enable Ports Forwarding to Host
+
+#### Assuming NAT Interface
+
+##### **Enable ports inside the VM Instance**
+
+```
+cd $HOME/labs/dtx_ai_sec_workshop_lab/ && git pull origin main && cd $HOME
+sudo $HOME/labs/dtx_ai_sec_workshop_lab/setup/scripts/tools/open_ufw_ports.sh
+```
+
+##### **Enable port forwaring at VM instance at VMbox level**
+
+**Crucial Prerequisite for Both Methods:**
+Before you start, open the VirtualBox application and ensure your **"DTX AI Security Labs GUI"** virtual machine is completely **Powered Off**. This will prevent the "machine is already locked" error.
+
+-----
+
+### Option 1: Using the VirtualBox Graphical Interface (GUI)
+
+This method involves manually adding each rule through the VirtualBox settings window. It's straightforward but requires repeating steps.
+
+1.  **Open VirtualBox** and select the `"DTX AI Security Labs GUI"` VM from the list.
+
+2.  Click the **Settings** button (the gear icon).
+
+3.  In the Settings window, go to the **Network** section.
+
+4.  Make sure **Adapter 1** is enabled and **Attached to: NAT**.
+
+5.  Expand the **Advanced** section by clicking on it.
+
+6.  Click the **Port Forwarding** button. This will open a new window showing the list of rules.
+
+7.  Click the **"Adds new port forwarding rule"** icon (a green square with a `+`).
+
+8.  A new row will appear. Fill in the details for the first port. For example, for port **11436**:
+
+      * **Name:** `tcp-11436` (this is just a description)
+      * **Protocol:** `TCP`
+      * **Host IP:** Leave this blank (it will listen on all host network interfaces)
+      * **Host Port:** `11436`
+      * **Guest IP:** Leave this blank
+      * **Guest Port:** `11436`
+
+9.  **Repeat Step 7 and 8** for every single port in your list.
+
+10. Once you have added all the rules, click **OK** on the Port Forwarding window, and then **OK** on the main Settings window to save everything.
+
+-----
+
+### Option 2: Using a Single Command in Your Host's Terminal
+
+This method is much faster as it uses a single command to add all the rules at once. This should be run on your main computer, not inside the VM.
+
+1.  **Open a terminal or command prompt on your host machine:**
+
+      * **Windows:** Open **PowerShell** or **Command Prompt**.
+      * **macOS / Linux:** Open the **Terminal** application.
+
+2.  **Copy and paste the entire command block below** into your terminal. This command contains your specific VM name and the complete list of ports.
+
+    ```bash
+    for port in 11436 17860 17861 17862 17863 18000 18081 28080 8080 3389 10001 3000 15000 14000 14001 14002 14003 14004 14005 14006 14007 14008 14009 14010 14011 14012 18567 18568 18569 18570 18571 18572 18573 18574 18575 18576; do echo "Adding rule for port $port..."; VBoxManage modifyvm "DTX AI Security Labs GUI" --natpf1 "tcp-$port,tcp,,$port,,$port"; done; echo "All rules added successfully."
+    ```
+
+3.  **Press Enter to run the command.** It will loop through each port and apply the forwarding rule automatically.
+
+### Final Step (After Using Either Option)
+
+After you have added the rules using either the GUI or the command line, you can **start your VM**. The final and necessary step is to **configure the firewall inside the Ubuntu VM** to allow incoming traffic on these same ports.
+
+
+
+
+
 ## Additional Configs 
 - Create SSH key using 
 ``` bash
