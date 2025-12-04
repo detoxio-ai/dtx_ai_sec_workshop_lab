@@ -233,7 +233,7 @@ setup/scripts/tools/labs/webapps/twenty/stop.sh
 ```
 
 **Setup:**
--   Access the application at `http://localhost:3000`.
+-   Access the application at `http://IP_ADDRESS:17001` (binds to `0.0.0.0`).
 -   Follow the on-screen instructions to create your account.
 
 ---
@@ -257,12 +257,12 @@ setup/scripts/tools/labs/webapps/erpnext/stop.sh
 ```
 
 **Setup:**
--   Access the application at `http://localhost:8080`.
+-   Access the application at `http://IP_ADDRESS:17002` (binds to `0.0.0.0`).
 -   **Default User:** `Administrator`
 -   **Default Password:** `admin`
 
 > [!NOTE]
-> ERPNext uses port `8080` by default. If you need to change it, set the `ERP_HTTP_PORT` environment variable before starting.
+> ERPNext uses port `17002` by default. If you need to change it, set the `ERP_HTTP_PORT` environment variable before starting.
 
 ---
 
@@ -285,12 +285,12 @@ setup/scripts/tools/labs/webapps/espocrm/stop.sh
 ```
 
 **Setup:**
--   Access the application at `http://localhost:8080`.
+-   Access the application at `http://IP_ADDRESS:17003` (binds to `0.0.0.0`; websockets on `17004`).
 -   **Default User:** `admin`
 -   **Default Password:** `password`
 
 > [!NOTE]
-> EspoCRM uses port `8080` by default. If you need to change it, set the `ESPOCRM_HTTP_PORT` environment variable before starting.
+> EspoCRM uses port `17003` (and websocket `17004`) by default. If you need to change them, set the `ESPOCRM_HTTP_PORT` and `ESPOCRM_WEBSOCKET_PORT` environment variables before starting.
 
 ---
 
@@ -551,4 +551,3 @@ Optional: logs to file and stdout
 | **AI Red Teaming Playground Labs** | `~/labs/webapps/AI-Red-Teaming-Playground-Labs/start.sh` / `stop.sh` | `http://IP_ADDRESS:15000` (login via `?auth=...`) |
 Labs launch on http://IP_ADDRESS:4001 … http://IP_ADDRESS:4012
 | DVMCP             | `./start_service.sh`            | `http://IP_ADDRESS:18567-18576`       |
-
