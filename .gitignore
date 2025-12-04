@@ -62,3 +62,5 @@ build/
 # SQLite / local DBs
 *.sqlite
 *.sqlite3
+
+setup/scripts/tools/labs/webapps/
