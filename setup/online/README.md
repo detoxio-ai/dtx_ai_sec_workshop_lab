@@ -6,7 +6,7 @@ This environment has been set up for a **hands-on, high-level workshop**, giving
 Think of it as your own **sandbox** — you’ll be able to log in, explore, and interact with different demo applications and security tools. All you need is the **server address** (`IP_ADDRESS`) and the **private key** provided to you (either a `.ppk` file for Windows or an `id_ed25519` key for Linux/macOS/WSL).
 
 The lab exposes several example services on the following ports:
-**8443, 17860–17863, 8080, 18081, 18000, 15000, 3000, 4001-4012**
+**8443, 17860–17863, 18081, 18000, 15000, 17001, 17002, 17003, 4001–4012**
 
 Depending on your setup:
 
@@ -81,11 +81,12 @@ http://IP_ADDRESS:17860
 http://IP_ADDRESS:17861
 http://IP_ADDRESS:17862
 http://IP_ADDRESS:17863
-http://IP_ADDRESS:8080
 http://IP_ADDRESS:18081
 http://IP_ADDRESS:18000
 http://IP_ADDRESS:15000          (Playground Home UI)
-http://IP_ADDRESS:3000           (Twenty CRM)
+http://IP_ADDRESS:17001          (Twenty CRM)
+http://IP_ADDRESS:17002          (ERPNext)
+http://IP_ADDRESS:17003          (EspoCRM; websocket on 17004 if needed)
 http://IP_ADDRESS:4001..4012     (Playground Labs — one port per lab)
 ```
 
@@ -115,11 +116,14 @@ ssh -i id_ed25519 -o IdentitiesOnly=yes -N \
 -L 8443:localhost:8443 \
 -L 17860:localhost:17860 -L 17861:localhost:17861 \
 -L 17862:localhost:17862 -L 17863:localhost:17863 \
--L 8080:localhost:8080 \
 -L 18081:localhost:18081 \
 -L 18000:localhost:18000 \
 -L 15000:localhost:15000 \
--L 3000:localhost:3000 \
+-L 17001:localhost:17001 \
+-L 17002:localhost:17002 \
+-L 17003:localhost:17003 \
+# websocket (optional)
+# -L 17004:localhost:17004 \
 # Labs (choose any between 4001–4012, one -L per port you plan to use)
 # -L 4001:localhost:4001 -L 4002:localhost:4002 ... -L 4012:localhost:4012 \
 dtx@IP_ADDRESS
@@ -133,11 +137,13 @@ http://localhost:17860
 http://localhost:17861
 http://localhost:17862
 http://localhost:17863
-http://localhost:8080
 http://localhost:18081
 http://localhost:18000
 http://localhost:15000
-http://localhost:3000
+http://localhost:17001
+http://localhost:17002
+http://localhost:17003
+# websocket (optional): ws://localhost:17004
 ```
 
 ### B) PuTTY tunnels (Windows)
@@ -150,11 +156,13 @@ http://localhost:3000
    * `17861` → `127.0.0.1:17861` → **Add**
    * `17862` → `127.0.0.1:17862` → **Add**
    * `17863` → `127.0.0.1:17863` → **Add**
-   * `8080`  → `127.0.0.1:8080`  → **Add**
    * `18081` → `127.0.0.1:18081` → **Add**
    * `18000` → `127.0.0.1:18000` → **Add**
    * `15000` → `127.0.0.1:15000` → **Add**
-   * `3000`  → `127.0.0.1:3000`  → **Add**
+   * `17001` → `127.0.0.1:17001` → **Add** (Twenty CRM)
+   * `17002` → `127.0.0.1:17002` → **Add** (ERPNext)
+   * `17003` → `127.0.0.1:17003` → **Add** (EspoCRM HTTP)
+   * `17004` → `127.0.0.1:17004` → **Add** (EspoCRM websocket, optional)
    * (Labs) Add any of 4001–4012 → 127.0.0.1:<same port>
 3. Back to **Session** → **Open**
 4. Browse to the **localhost** URLs shown above.
