@@ -38,6 +38,9 @@ ANTHROPIC_API_KEY.txt  GROQ_API_KEY.txt  OPENAI_API_KEY.txt
 | ------------------ | --------------- | ------------- | --------------------------------------- |
 | Pentagi            | Cybersecurity   | Web (Docker)  | Cyber lab interface                     |
 | AI Demo Agents     | AI Red Team     | Web (Docker)  | Prompt injection + eval agents          |
+| Twenty             | CRM             | Web (Docker)  | Modern CRM target for API & logic testing |
+| ERPNext            | ERP             | Web (Docker)  | Enterprise ERP target for business logic |
+| EspoCRM            | CRM             | Web (Docker)  | Standard CRM target for vulnerability testing |
 | Garak              | LLM Testing     | CLI           | LLM vulnerability scanner               |
 | DTX                | LLM Testing     | CLI           | Red teaming & prompt evaluation         |
 | Promptfoo          | LLM Evaluation  | CLI / Web     | Prompt eval framework                   |
@@ -199,11 +202,95 @@ subfinder -d example.com
 nuclei -u http://example.com
 ```
 
+---
+
 ### ⚡ Nmap
 
 ```bash
 nmap -sV -Pn -T4 -p- example.com
 ```
+
+---
+
+## 🧩 CRM/ERP apps (Docker)
+
+### Twenty (CRM)
+
+**Installation:**
+Run the installation script:
+```bash
+setup/scripts/tools/install-twenty.sh
+```
+
+**Start:**
+```bash
+setup/scripts/tools/labs/webapps/twenty/start.sh
+```
+
+**Stop:**
+```bash
+setup/scripts/tools/labs/webapps/twenty/stop.sh
+```
+
+**Setup:**
+-   Access the application at `http://localhost:3000`.
+-   Follow the on-screen instructions to create your account.
+
+---
+
+### ERPNext (ERP)
+
+**Installation:**
+Run the installation script:
+```bash
+setup/scripts/tools/install-erpnext.sh
+```
+
+**Start:**
+```bash
+setup/scripts/tools/labs/webapps/erpnext/start.sh
+```
+
+**Stop:**
+```bash
+setup/scripts/tools/labs/webapps/erpnext/stop.sh
+```
+
+**Setup:**
+-   Access the application at `http://localhost:8080`.
+-   **Default User:** `Administrator`
+-   **Default Password:** `admin`
+
+> [!NOTE]
+> ERPNext uses port `8080` by default. If you need to change it, set the `ERP_HTTP_PORT` environment variable before starting.
+
+---
+
+### EspoCRM (CRM)
+
+**Installation:**
+Run the installation script:
+```bash
+setup/scripts/tools/install-espocrm.sh
+```
+
+**Start:**
+```bash
+setup/scripts/tools/labs/webapps/espocrm/start.sh
+```
+
+**Stop:**
+```bash
+setup/scripts/tools/labs/webapps/espocrm/stop.sh
+```
+
+**Setup:**
+-   Access the application at `http://localhost:8080`.
+-   **Default User:** `admin`
+-   **Default Password:** `password`
+
+> [!NOTE]
+> EspoCRM uses port `8080` by default. If you need to change it, set the `ESPOCRM_HTTP_PORT` environment variable before starting.
 
 ---
 
@@ -464,5 +551,4 @@ Optional: logs to file and stdout
 | **AI Red Teaming Playground Labs** | `~/labs/webapps/AI-Red-Teaming-Playground-Labs/start.sh` / `stop.sh` | `http://IP_ADDRESS:15000` (login via `?auth=...`) |
 Labs launch on http://IP_ADDRESS:4001 … http://IP_ADDRESS:4012
 | DVMCP             | `./start_service.sh`            | `http://IP_ADDRESS:18567-18576`       |
-
 

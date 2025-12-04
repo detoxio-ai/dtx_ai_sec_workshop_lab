@@ -44,6 +44,7 @@ A hands-on sandbox for **AI security**—practice adversarial testing of LLMs, h
 * [`setup/`](setup) – installation guides & scripts
 
   * [`local/`](setup/local) · [`gcp/`](setup/gcp) · [`online/`](setup/online) · [`optionals/`](setup/optionals) · [`scripts/`](setup/scripts)
+  * Tool installers (under [`setup/scripts/tools/`](setup/scripts/tools/)) include CRM/ERP apps (Twenty, ERPNext, EspoCRM) that clone into `setup/scripts/tools/labs/webapps/` and use compose configs from [`setup/docker/`](setup/docker/).
 
 ---
 
